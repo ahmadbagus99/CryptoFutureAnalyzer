@@ -1,0 +1,29 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-Gjqx0e2P.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/analysis-chart.js": {
+    "file": "assets/analysis-chart-CyoSmITz.js",
+    "name": "analysis-chart",
+    "src": "resources/js/analysis-chart.js",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BU6mFzGd.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/entry-watch.js": {
+    "file": "assets/entry-watch-mMbv5EZy.js",
+    "name": "entry-watch",
+    "src": "resources/js/entry-watch.js",
+    "isEntry": true
+  }
+}

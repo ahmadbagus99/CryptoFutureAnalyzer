@@ -356,9 +356,6 @@ class Builder implements BuilderContract
 
             $this->eagerLoad = array_merge($this->eagerLoad, $query->getEagerLoads());
 
-            $this->withoutGlobalScopes(
-                $query->removedScopes()
-            );
             $this->query->addNestedWhereQuery($query->getQuery(), $boolean);
         } else {
             $this->query->where(...func_get_args());
@@ -721,8 +718,6 @@ class Builder implements BuilderContract
      * @param  array  $attributes
      * @param  (\Closure(): array)|array  $values
      * @return TModel
-     *
-     * @throws \Illuminate\Database\UniqueConstraintViolationException
      */
     public function createOrFirst(array $attributes = [], Closure|array $values = [])
     {
@@ -1352,34 +1347,6 @@ class Builder implements BuilderContract
     {
         return $this->toBase()->decrement(
             $column, $amount, $this->addUpdatedAtColumn($extra)
-        );
-    }
-
-    /**
-     * Increment the given column's values by the given amounts.
-     *
-     * @param  array<string, float|int|numeric-string>  $columns
-     * @param  array<string, mixed>  $extra
-     * @return int
-     */
-    public function incrementEach(array $columns, array $extra = [])
-    {
-        return $this->toBase()->incrementEach(
-            $columns, $this->addUpdatedAtColumn($extra)
-        );
-    }
-
-    /**
-     * Decrement the given column's values by the given amounts.
-     *
-     * @param  array<string, float|int|numeric-string>  $columns
-     * @param  array<string, mixed>  $extra
-     * @return int
-     */
-    public function decrementEach(array $columns, array $extra = [])
-    {
-        return $this->toBase()->decrementEach(
-            $columns, $this->addUpdatedAtColumn($extra)
         );
     }
 

@@ -177,8 +177,6 @@ class MySqlSchemaState extends SchemaState
      * @param  array  $variables
      * @param  int  $depth
      * @return \Symfony\Component\Process\Process
-     *
-     * @throws \Throwable
      */
     protected function executeDumpProcess(Process $process, $output, array $variables, int $depth = 0)
     {

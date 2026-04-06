@@ -7,7 +7,6 @@ use Faker\Generator;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -16,7 +15,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Illuminate\Support\Traits\Macroable;
-use ReflectionClass;
 use Throwable;
 use UnitEnum;
 
@@ -151,13 +149,6 @@ abstract class Factory
      * @var bool
      */
     protected static $expandRelationshipsByDefault = true;
-
-    /**
-     * The cached model class names resolved from attributes.
-     *
-     * @var array<class-string, class-string<TModel>|false>
-     */
-    protected static $cachedModelAttributes = [];
 
     /**
      * Create a new factory instance.
@@ -944,18 +935,6 @@ abstract class Factory
      */
     public function modelName()
     {
-        if (! array_key_exists(static::class, static::$cachedModelAttributes)) {
-            $attribute = (new ReflectionClass($this))->getAttributes(UseModel::class);
-
-            static::$cachedModelAttributes[static::class] = count($attribute) > 0
-                ? $attribute[0]->newInstance()->class
-                : false;
-        }
-
-        if (static::$cachedModelAttributes[static::class]) {
-            return static::$cachedModelAttributes[static::class];
-        }
-
         if ($this->model !== null) {
             return $this->model;
         }
@@ -1148,10 +1127,6 @@ abstract class Factory
         if (str_starts_with($method, 'for')) {
             return $this->for($factory->state($parameters[0] ?? []), $relationship);
         } elseif (str_starts_with($method, 'has')) {
-            if (count($parameters) > 1 && array_all($parameters, fn ($p) => is_array($p))) {
-                return $this->has($factory->forEachSequence(...$parameters), $relationship);
-            }
-
             return $this->has(
                 $factory
                     ->count(is_numeric($parameters[0] ?? null) ? $parameters[0] : 1)

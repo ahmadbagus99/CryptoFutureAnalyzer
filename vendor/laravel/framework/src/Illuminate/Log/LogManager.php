@@ -23,8 +23,6 @@ use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-use function Illuminate\Support\enum_value;
-
 /**
  * @mixin \Illuminate\Log\Logger
  */
@@ -108,7 +106,7 @@ class LogManager implements LoggerInterface
     /**
      * Get a log channel instance.
      *
-     * @param  \UnitEnum|string|null  $channel
+     * @param  string|null  $channel
      * @return \Psr\Log\LoggerInterface
      */
     public function channel($channel = null)
@@ -119,12 +117,12 @@ class LogManager implements LoggerInterface
     /**
      * Get a log driver instance.
      *
-     * @param  \UnitEnum|string|null  $driver
+     * @param  string|null  $driver
      * @return \Psr\Log\LoggerInterface
      */
     public function driver($driver = null)
     {
-        return $this->get($this->parseDriver(enum_value($driver)));
+        return $this->get($this->parseDriver($driver));
     }
 
     /**

@@ -194,7 +194,7 @@ class BelongsToMany extends Relation
             return $table;
         }
 
-        if (isset(class_uses_recursive($model)[AsPivot::class])) {
+        if (in_array(AsPivot::class, class_uses_recursive($model))) {
             $this->using($table);
         }
 
@@ -677,8 +677,6 @@ class BelongsToMany extends Relation
      * @param  array  $joining
      * @param  bool  $touch
      * @return TRelatedModel&object{pivot: TPivotModel}
-     *
-     * @throws \Illuminate\Database\UniqueConstraintViolationException
      */
     public function createOrFirst(array $attributes = [], Closure|array $values = [], array $joining = [], $touch = true)
     {

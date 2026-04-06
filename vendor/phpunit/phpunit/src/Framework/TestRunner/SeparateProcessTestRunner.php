@@ -14,12 +14,10 @@ use function defined;
 use function get_include_path;
 use function hrtime;
 use function serialize;
-use function sprintf;
 use function sys_get_temp_dir;
 use function tempnam;
 use function unlink;
 use function var_export;
-use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Event\NoPreviousThrowableException;
 use PHPUnit\Runner\CodeCoverage;
 use PHPUnit\TextUI\Configuration\Registry as ConfigurationRegistry;
@@ -73,22 +71,10 @@ final class SeparateProcessTestRunner implements IsolatedTestRunner
         }
 
         if ($preserveGlobalState) {
-            $constants         = GlobalState::getConstantsAsString();
-            $globalStateResult = GlobalState::exportGlobals();
-            $globals           = $globalStateResult->globalsString();
-            $includedFiles     = GlobalState::getIncludedFilesAsString();
-            $iniSettings       = GlobalState::getIniSettingsAsString();
-
-            foreach ($globalStateResult->skippedGlobals() as $skipped) {
-                EventFacade::emitter()->testTriggeredPhpunitWarning(
-                    $test->valueObjectForEvents(),
-                    sprintf(
-                        'Global variable %s was not preserved because it %s',
-                        $skipped['name'],
-                        $skipped['reason'],
-                    ),
-                );
-            }
+            $constants     = GlobalState::getConstantsAsString();
+            $globals       = GlobalState::getGlobalsAsString();
+            $includedFiles = GlobalState::getIncludedFilesAsString();
+            $iniSettings   = GlobalState::getIniSettingsAsString();
         }
 
         $coverage = CodeCoverage::instance()->isActive() ? 'true' : 'false';

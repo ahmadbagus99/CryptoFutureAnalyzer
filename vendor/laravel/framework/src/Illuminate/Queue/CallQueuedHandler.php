@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Log\Context\Repository as ContextRepository;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use ReflectionClass;
 use RuntimeException;
 
 class CallQueuedHandler
@@ -164,7 +166,7 @@ class CallQueuedHandler
      */
     protected function setJobInstanceIfNecessary(Job $job, $instance)
     {
-        if (isset(class_uses_recursive($instance)[InteractsWithQueue::class])) {
+        if (in_array(InteractsWithQueue::class, class_uses_recursive($instance))) {
             $instance->setJob($job);
         }
 
@@ -194,7 +196,8 @@ class CallQueuedHandler
     {
         $uses = class_uses_recursive($command);
 
-        if (! isset($uses[Batchable::class], $uses[InteractsWithQueue::class])) {
+        if (! in_array(Batchable::class, $uses) ||
+            ! in_array(InteractsWithQueue::class, $uses)) {
             return;
         }
 
@@ -243,10 +246,21 @@ class CallQueuedHandler
      */
     protected function handleModelNotFound(Job $job, $e)
     {
+        $class = $job->resolveQueuedJobClass();
+
+        try {
+            $reflectionClass = new ReflectionClass($class);
+
+            $shouldDelete = $reflectionClass->getDefaultProperties()['deleteWhenMissingModels']
+                ?? count($reflectionClass->getAttributes(DeleteWhenMissingModels::class)) !== 0;
+        } catch (Exception) {
+            $shouldDelete = false;
+        }
+
         $this->ensureUniqueJobLockIsReleasedViaContext();
 
-        if ($job->payload()['deleteWhenMissingModels'] ?? false) {
-            $this->ensureSuccessfulBatchJobIsRecordedForMissingModel($job, $job->resolveQueuedJobClass());
+        if ($shouldDelete) {
+            $this->ensureSuccessfulBatchJobIsRecordedForMissingModel($job, $class);
 
             return $job->delete();
         }
@@ -292,7 +306,7 @@ class CallQueuedHandler
      */
     protected function ensureSuccessfulBatchJobIsRecordedForMissingModel(Job $job, string $class)
     {
-        if (! isset(class_uses_recursive($class)[Batchable::class])) {
+        if (! in_array(Batchable::class, class_uses_recursive($class), true)) {
             return;
         }
 
@@ -357,7 +371,7 @@ class CallQueuedHandler
      */
     protected function ensureFailedBatchJobIsRecorded(string $uuid, $command, $e)
     {
-        if (! isset(class_uses_recursive($command)[Batchable::class])) {
+        if (! in_array(Batchable::class, class_uses_recursive($command))) {
             return;
         }
 

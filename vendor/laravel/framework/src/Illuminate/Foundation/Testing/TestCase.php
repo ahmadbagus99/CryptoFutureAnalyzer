@@ -4,10 +4,7 @@ namespace Illuminate\Foundation\Testing;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Testing\Attributes\UnitTest;
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use ReflectionMethod;
-use Throwable;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -39,7 +36,7 @@ abstract class TestCase extends BaseTestCase
     {
         $app = require Application::inferBasePath().'/bootstrap/app.php';
 
-        $this->traitsUsedByTest = class_uses_recursive(static::class);
+        $this->traitsUsedByTest = array_flip(class_uses_recursive(static::class));
 
         if (isset(CachedState::$cachedConfig) &&
             isset($this->traitsUsedByTest[WithCachedConfig::class])) {
@@ -63,10 +60,6 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUp(): void
     {
-        if ($this->withoutBootingFramework()) {
-            return;
-        }
-
         $this->setUpTheTestEnvironment();
     }
 
@@ -89,27 +82,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function tearDown(): void
     {
-        if ($this->withoutBootingFramework()) {
-            return;
-        }
-
         $this->tearDownTheTestEnvironment();
-    }
-
-    /**
-     * Determine if the test method should boot the framework.
-     *
-     * @return bool
-     *
-     * @throws \ReflectionException
-     */
-    protected function withoutBootingFramework(): bool
-    {
-        try {
-            return (new ReflectionMethod(static::class, $this->name()))->getAttributes(UnitTest::class) !== [];
-        } catch (Throwable) {
-            return false;
-        }
     }
 
     /**

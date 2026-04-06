@@ -18,10 +18,6 @@ use Illuminate\Contracts\Broadcasting\ShouldRescue;
 use Illuminate\Contracts\Bus\Dispatcher as BusDispatcherContract;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Foundation\CachesRoutes;
-use Illuminate\Queue\Attributes\Connection as ConnectionAttribute;
-use Illuminate\Queue\Attributes\Queue as QueueAttribute;
-use Illuminate\Queue\Attributes\ReadsQueueAttributes;
-use Illuminate\Support\Queue\Concerns\ResolvesQueueRoutes;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Pusher\Pusher;
@@ -33,8 +29,6 @@ use Throwable;
  */
 class BroadcastManager implements FactoryContract
 {
-    use ReadsQueueAttributes, ResolvesQueueRoutes;
-
     /**
      * The application instance.
      *
@@ -84,7 +78,7 @@ class BroadcastManager implements FactoryContract
             $router->match(
                 ['get', 'post'], '/broadcasting/auth',
                 '\\'.BroadcastController::class.'@authenticate'
-            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class]);
+            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
         });
     }
 
@@ -106,7 +100,7 @@ class BroadcastManager implements FactoryContract
             $router->match(
                 ['get', 'post'], '/broadcasting/user-auth',
                 '\\'.BroadcastController::class.'@authenticateUser'
-            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class]);
+            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
         });
     }
 
@@ -202,12 +196,6 @@ class BroadcastManager implements FactoryContract
             default => null,
         };
 
-        if (is_null($queue)) {
-            $queue = $this->getAttributeValue($event, QueueAttribute::class, 'queue')
-                ?? $this->resolveQueueFromQueueRoute($event)
-                ?? null;
-        }
-
         $broadcastEvent = new BroadcastEvent(clone $event);
 
         if ($event instanceof ShouldBeUnique) {
@@ -219,12 +207,7 @@ class BroadcastManager implements FactoryContract
         }
 
         $push = fn () => $this->app->make('queue')
-            ->connection(
-                $event->connection
-                    ?? $this->getAttributeValue($event, ConnectionAttribute::class, 'connection')
-                    ?? $this->resolveConnectionFromQueueRoute($event)
-                    ?? null
-            )
+            ->connection($event->connection ?? null)
             ->pushOn($queue, $broadcastEvent);
 
         $event instanceof ShouldRescue
@@ -250,12 +233,12 @@ class BroadcastManager implements FactoryContract
     /**
      * Get a driver instance.
      *
-     * @param  string|null  $name
+     * @param  string|null  $driver
      * @return mixed
      */
-    public function connection($name = null)
+    public function connection($driver = null)
     {
-        return $this->driver($name);
+        return $this->driver($driver);
     }
 
     /**
@@ -289,7 +272,6 @@ class BroadcastManager implements FactoryContract
      * @return \Illuminate\Contracts\Broadcasting\Broadcaster
      *
      * @throws \InvalidArgumentException
-     * @throws \RuntimeException
      */
     protected function resolve($name)
     {
@@ -465,7 +447,7 @@ class BroadcastManager implements FactoryContract
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['broadcasting.default'] ?? 'null';
+        return $this->app['config']['broadcasting.default'];
     }
 
     /**
@@ -497,19 +479,10 @@ class BroadcastManager implements FactoryContract
      *
      * @param  string  $driver
      * @param  \Closure  $callback
-     *
-     * @param-closure-this  $this  $callback
-     *
      * @return $this
      */
     public function extend($driver, Closure $callback)
     {
-        try {
-            $callback = $callback->bindTo($this, static::class) ?? throw new RuntimeException;
-        } catch (Throwable) {
-            $callback = $callback->bindTo(null, static::class);
-        }
-
         $this->customCreators[$driver] = $callback;
 
         return $this;

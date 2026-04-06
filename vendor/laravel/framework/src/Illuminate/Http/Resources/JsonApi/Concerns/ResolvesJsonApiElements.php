@@ -42,7 +42,7 @@ trait ResolvesJsonApiElements
     public $loadedRelationshipsMap;
 
     /**
-     * Cached loaded relationships identifiers.
+     * Cached loaded relationships identifers.
      */
     protected array $loadedRelationshipIdentifiers = [];
 
@@ -53,8 +53,6 @@ trait ResolvesJsonApiElements
 
     /**
      * Specify the maximum relationship depth.
-     *
-     * @param  non-negative-int  $depth
      */
     public static function maxRelationshipDepth(int $depth): void
     {
@@ -83,14 +81,14 @@ trait ResolvesJsonApiElements
     /**
      * Resolve the resource's identifier.
      *
-     * @return string
+     * @return string|int
      *
      * @throws ResourceIdentificationException
      */
     public function resolveResourceIdentifier(JsonApiRequest $request): string
     {
         if (! is_null($resourceId = $this->toId($request))) {
-            return (string) $resourceId;
+            return $resourceId;
         }
 
         if (! ($this->resource instanceof Model || method_exists($this->resource, 'getKey'))) {
@@ -102,6 +100,7 @@ trait ResolvesJsonApiElements
 
     /**
      * Resolve the resource's type.
+     *
      *
      * @throws ResourceIdentificationException
      */
@@ -130,6 +129,7 @@ trait ResolvesJsonApiElements
 
     /**
      * Resolve the resource's attributes.
+     *
      *
      * @throws \RuntimeException
      */
@@ -208,6 +208,7 @@ trait ResolvesJsonApiElements
         $this->loadedRelationshipIdentifiers = (new LazyCollection(function () use ($request, $resourceRelationships) {
             foreach ($resourceRelationships as $relationName => $relationResolver) {
                 $relatedModels = $relationResolver->handle($this->resource);
+                $relatedResourceClass = $relationResolver->resourceClass();
 
                 if (! is_null($relatedModels) && $this->includesPreviouslyLoadedRelationships === false) {
                     if (! empty($relations = $request->sparseIncluded($relationName))) {
@@ -280,7 +281,7 @@ trait ResolvesJsonApiElements
 
             return;
         } elseif ($relatedModel instanceof Pivot ||
-            isset(class_uses_recursive($relatedModel)[AsPivot::class])) {
+            in_array(AsPivot::class, class_uses_recursive($relatedModel), true)) {
             yield $relationName => new MissingValue;
 
             return;

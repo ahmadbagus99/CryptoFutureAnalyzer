@@ -7,7 +7,7 @@ final class SetupScannerService
     /**
      * @return array{signals: list<array<string, mixed>>, errors: list<array<string, string>>}
      */
-    public function scan(string $interval, int $limit): array
+    public function scan(string $interval, int $limit, bool $withClaude = false): array
     {
         $symbols = config('crypto.scan_symbols');
         if (! is_array($symbols) || $symbols === []) {
@@ -19,6 +19,7 @@ final class SetupScannerService
 
         $signals = [];
         $errors = [];
+        $claude = $withClaude ? new ClaudeMarketAnalyzer : null;
 
         foreach ($symbols as $symbol) {
             $symbol = strtoupper(trim((string) $symbol));
@@ -34,11 +35,22 @@ final class SetupScannerService
                 if ($text === '') {
                     continue;
                 }
+
+                $claudeText = '';
+                if ($claude) {
+                    try {
+                        $claudeText = $claude->summarize($data, $interval);
+                    } catch (\Throwable) {
+                        $claudeText = '';
+                    }
+                }
+
                 $signals[] = [
                     'symbol' => $data['symbol'],
                     'side' => $data['trade_setup']['side'] ?? '',
                     'accuracy' => SignalCardFormatter::accuracyLabel($data),
                     'card' => $text,
+                    'claude' => $claudeText,
                 ];
             } catch (\Throwable $e) {
                 $msg = $e->getMessage();

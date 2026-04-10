@@ -15,6 +15,7 @@ return array(
     'App\\Services\\BinanceFuturesClient' => $baseDir . '/app/Services/BinanceFuturesClient.php',
     'App\\Services\\BybitFuturesClient' => $baseDir . '/app/Services/BybitFuturesClient.php',
     'App\\Services\\Candle' => $baseDir . '/app/Services/Candle.php',
+    'App\\Services\\ClaudeMarketAnalyzer' => $baseDir . '/app/Services/ClaudeMarketAnalyzer.php',
     'App\\Services\\CryptocompareClient' => $baseDir . '/app/Services/CryptocompareClient.php',
     'App\\Services\\FallbackFuturesClient' => $baseDir . '/app/Services/FallbackFuturesClient.php',
     'App\\Services\\FuturesAnalysisService' => $baseDir . '/app/Services/FuturesAnalysisService.php',

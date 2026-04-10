@@ -20,11 +20,13 @@ class ScanController extends Controller
         $limit = min(max($limit, 50), 1500);
 
         $run = $request->boolean('run');
+        $withClaude = $request->boolean('claude');
+        $claudeAvailable = (string) config('crypto.claude_api_key', '') !== '';
 
         $signals = [];
         $errors = [];
         if ($run) {
-            ['signals' => $signals, 'errors' => $errors] = $scanner->scan($interval, $limit);
+            ['signals' => $signals, 'errors' => $errors] = $scanner->scan($interval, $limit, $withClaude && $claudeAvailable);
         }
 
         return view('scan.index', [
@@ -36,6 +38,9 @@ class ScanController extends Controller
             'scanSymbols' => config('crypto.scan_symbols', config('crypto.quick_symbols', [])),
             'intervals' => config('crypto.intervals'),
             'leverage' => (int) config('crypto.default_leverage', 10),
+            'withClaude' => $withClaude && $claudeAvailable,
+            'claudeRequested' => $withClaude,
+            'claudeAvailable' => $claudeAvailable,
         ]);
     }
 }

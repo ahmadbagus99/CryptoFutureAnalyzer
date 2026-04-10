@@ -530,6 +530,7 @@ class ComposerStaticInitc57754c93ae34ac3b9b716a0fd2f2149
         'App\\Services\\BinanceFuturesClient' => __DIR__ . '/../..' . '/app/Services/BinanceFuturesClient.php',
         'App\\Services\\BybitFuturesClient' => __DIR__ . '/../..' . '/app/Services/BybitFuturesClient.php',
         'App\\Services\\Candle' => __DIR__ . '/../..' . '/app/Services/Candle.php',
+        'App\\Services\\ClaudeMarketAnalyzer' => __DIR__ . '/../..' . '/app/Services/ClaudeMarketAnalyzer.php',
         'App\\Services\\CryptocompareClient' => __DIR__ . '/../..' . '/app/Services/CryptocompareClient.php',
         'App\\Services\\FallbackFuturesClient' => __DIR__ . '/../..' . '/app/Services/FallbackFuturesClient.php',
         'App\\Services\\FuturesAnalysisService' => __DIR__ . '/../..' . '/app/Services/FuturesAnalysisService.php',

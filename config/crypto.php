@@ -70,6 +70,12 @@ return [
     /** Batas waktu PHP untuk satu kali scan semua simbol */
     'scan_max_seconds' => (int) env('SCAN_MAX_SECONDS', 300),
 
+    /** Integrasi Claude untuk analisis tambahan setelah setup ditemukan */
+    'claude_api_key' => env('ANTHROPIC_API_KEY', ''),
+    'claude_model' => env('ANTHROPIC_MODEL', 'claude-3-5-sonnet-latest'),
+    'claude_max_tokens' => (int) env('ANTHROPIC_MAX_TOKENS', 350),
+    'claude_timeout' => (int) env('ANTHROPIC_TIMEOUT', 20),
+
     'intervals' => [
         '1m', '3m', '5m', '15m', '30m',
         '1h', '2h', '4h', '6h', '12h',

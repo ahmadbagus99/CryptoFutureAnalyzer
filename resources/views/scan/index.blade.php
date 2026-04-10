@@ -29,6 +29,7 @@
         }
         .err { color: var(--red); font-size: 0.85rem; }
         .tag { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem; background: #21262d; margin-right: 0.35rem; }
+        .claude { margin-top: 0.6rem; padding: 0.65rem; border: 1px solid var(--border); border-radius: 6px; background: #10151d; font-size: 0.8rem; white-space: pre-wrap; }
         a { color: var(--accent); }
     </style>
 </head>
@@ -49,8 +50,15 @@
             <label>Limit kline
                 <input type="number" name="limit" min="50" max="1500" value="{{ $limit }}">
             </label>
+            <label style="font-size:0.8rem;display:flex;flex-direction:row;gap:0.5rem;align-items:center;color:var(--text);">
+                <input type="checkbox" name="claude" value="1" @checked($withClaude || $claudeRequested) @disabled(!$claudeAvailable)>
+                Tambah analisis Claude
+            </label>
             <button type="submit" class="primary">Jalankan scan</button>
         </form>
+        @if (!$claudeAvailable)
+            <p style="font-size:0.78rem;color:var(--muted);margin-top:-0.5rem;margin-bottom:1rem;">Claude nonaktif: isi <code>ANTHROPIC_API_KEY</code> di .env untuk mengaktifkan analisis tambahan.</p>
+        @endif
 
         <p style="font-size:0.8rem;color:var(--muted);">Simbol di-scan: {{ implode(', ', $scanSymbols) }} · Leverage teks: {{ $leverage }}x</p>
         <p style="font-size:0.8rem;"><a href="{{ route('analysis.index') }}">← Kembali ke analisis</a></p>
@@ -81,6 +89,10 @@
                     <button type="button" class="secondary copy-one">Salin teks</button>
                 </div>
                 <pre class="signal">{{ $sig['card'] }}</pre>
+                @if (!empty($sig['claude']))
+                    <div class="claude"><strong>Analisis Claude</strong>
+{{ $sig['claude'] }}</div>
+                @endif
             </div>
         @endforeach
 

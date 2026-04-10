@@ -56,12 +56,13 @@ return [
         'SOLUSDT',
         'BNBUSDT',
         'XRPUSDT',
+        'NOMUSDT',
     ],
 
     /** Simbol yang di-scan (CSV di .env SCAN_SYMBOLS) */
     'scan_symbols' => array_values(array_filter(array_map(
         'trim',
-        explode(',', (string) env('SCAN_SYMBOLS', 'BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT'))
+        explode(',', (string) env('SCAN_SYMBOLS', 'BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT,NOMUSDT'))
     ))),
 
     /** Leverage default untuk teks sinyal (bukan eksekusi otomatis) */
